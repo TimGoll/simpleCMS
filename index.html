@@ -5,13 +5,23 @@
 
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-    <script type="text/javascript" src="libs/simpleAJAX.min.js"></script>
-    <script type="text/javascript" src="libs/LScache.min.js"></script>
+    <script type="text/javascript" src="/src/libs/simpleAJAX.min.js"></script>
+    <script type="text/javascript" src="/src/libs/LScache.min.js"></script>
 
-    <script type="text/javascript" src="javascript/simpleCMS.js"></script>
+    <script type="text/javascript" src="/src/javascript/simpleCMS.js"></script>
+
+    <script>
+        window.onload = function() {
+            simpleCMS.registerTemplate('home', 0, undefined, '/src/templates/home.html', 'content');
+            simpleCMS.registerTemplate('wishes', 1, '/home', '/src/templates/wishes.html', 'content');
+            simpleCMS.init({homedir: 'home'});
+        };
+    </script>
 
 </head>
     <body>
+        <div id="content">
 
+        </div>
     </body>
 </html>
