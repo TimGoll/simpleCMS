@@ -43,17 +43,28 @@ var simpleCMS = (function() {
 
             var _urlData = _getUrlData(rel_url);
 
+            //check if last value is in templates
             if (!(_urlData[_urlData.length -1] in _templates)) {
                 url = '/error404';
                 rel_url = 'error404';
                 _urlData.push(rel_url);
             }
 
+            var this_template = _templates[ _urlData[_urlData.length -1] ];
+
+            //check if requiredUrl is fitting
+            var required_rel_url = '/' + rel_url.substr(0, rel_url.indexOf( _urlData[_urlData.length -1] ));
+            if (this_template.requiredUrl != undefined && this_template.requiredUrl != required_rel_url) {
+                url = '/error404';
+                rel_url = 'error404';
+                _urlData.push(rel_url);
+                this_template = _templates[ _urlData[_urlData.length -1] ];
+            }
+
             if (newState == true)
                 window.history.pushState("object or string", "title", url);
 
             //CHANGE CONTENT
-            var this_template = _templates[ _urlData[_urlData.length -1] ];
             simpleAJAX.request(null, this_template.templateUrl, function(data) {
                 document.getElementById(this_template.insertionId).innerHTML = data;
             });
