@@ -53,6 +53,9 @@ simpleCMS.registerTemplate('webmail', 2, '/home/contact/', '/src/templates/webma
 // ...
 ```
 
+## Navigation
+Klassiche Links mittels `<a href="/home/contact">Contact</a>` sind weiterhin möglich und werden abgefangen ohne die Seite neu zu laden. Außerdem kann die Seite geändert werden mittels Javascript. Dazu ist der Befehl `simpleCMS.setPage(url)` von nöten.
+
 ## WebsiteContent
 Per Standard müssen sich alle Dateien im `/src/`-Ordner auf dem Webserver befinden, damit der Apache-Server die URL nicht umschreibt (URL-Rewriting ist hier nötig um Pfade wie `domain.com/home/contact` ohne `?` zu nutzen und ohne dass die Pfade tatsächlich existieren müssen).
 
