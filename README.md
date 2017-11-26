@@ -17,12 +17,13 @@ Beim initialen Seitenladen muss einiges eingerichtet werden. Zuerst müssen die 
 
 ### registerTemplate
 ```javascript
-simpleCMS.registerTemplate(urlArgument, urlDepth, requiredPath, templatePath, htmlElement);
-// urlArgument  : String after the last '/' which is linked to this template
-// urlDepth     : number of leading url argument (domain.com/home: 0, domain.com/home/contact: 1)
-// requiredPath : path before the urlArgument, can be 'undefined' (if isset to '/home/' domain.com/contact will redirect to 'error404', because domain.com/home/contact is needed)
-// templatePath : path to the template
-// htmlElement  : html element to insert the template into
+simpleCMS.registerTemplate(urlArgument, urlDepth, requiredPath, templatePath, htmlElement, modifyCallback);
+// urlArgument    : String after the last '/' which is linked to this template
+// urlDepth       : number of leading url argument (domain.com/home: 0, domain.com/home/contact: 1)
+// requiredPath   : path before the urlArgument, can be 'undefined' (if isset to '/home/' domain.com/contact will redirect to 'error404', because domain.com/home/contact is needed)
+// templatePath   : path to the template
+// htmlElement    : html element to insert the template into
+// modifyCallback : a callback function, which is called after the loading of the template is finished, can be 'undefined'
 ```
 
 ### init
@@ -41,8 +42,19 @@ window.onload = function() {
 };
 ```
 
+### Beispiel mit Callback
+Es ist außerdem möglich eine Callbackfunktion zu registrieren, die **nach** dem Erfolgreichen Laden und Einbinden des Templates ausgeführt wird. Dies ist gedacht für Code, der nach dem Laden einmalig ausgeführt werden soll.
+
+```javascript
+// ...
+simpleCMS.registerTemplate('webmail', 2, '/home/contact/', '/src/templates/webmail.html', 'content', function() {
+    //do something
+});
+// ...
+```
+
 ## WebsiteContent
-Per Standard sind müssen sich alle Dateien im `/src/`-Ordner auf dem Webserver befinden, damit der Apache-Server die URL nicht umschreibt (URL-Rewriting ist hier nötig um Pfade wie `domain.com/home/contact` ohne `?` zu nutzen und ohne dass die Pfade tatsächlich existieren müssen).
+Per Standard müssen sich alle Dateien im `/src/`-Ordner auf dem Webserver befinden, damit der Apache-Server die URL nicht umschreibt (URL-Rewriting ist hier nötig um Pfade wie `domain.com/home/contact` ohne `?` zu nutzen und ohne dass die Pfade tatsächlich existieren müssen).
 
 Dies lässt sich in der `.htaccess`-Datei ändern.
 ```htaccess
