@@ -17,13 +17,17 @@ Beim initialen Seitenladen muss einiges eingerichtet werden. Zuerst müssen die 
 
 ### registerTemplate
 ```javascript
-simpleCMS.registerTemplate(urlArgument, urlDepth, requiredPath, templatePath, htmlElement, modifyCallback);
-// urlArgument    : String after the last '/' which is linked to this template
-// urlDepth       : number of leading url argument (domain.com/home: 0, domain.com/home/contact: 1)
-// requiredPath   : path before the urlArgument, can be 'undefined' (if isset to '/home/' domain.com/contact will redirect to 'error404', because domain.com/home/contact is needed)
-// templatePath   : path to the template
-// htmlElement    : html element to insert the template into
-// modifyCallback : a callback function, which is called after the loading of the template is finished, can be 'undefined'
+simpleCMS.registerTemplate : function(urlArgument, templateUrl, insertionElementId, {requiredUrl, insertIntoParentTemplate, hasTemplate}, modifyCallback);
+// urlArgument              : String after the last '/' which is linked to this template
+// templateUrl              : path to the template
+// insertionElementId       : html element ID to insert the template into
+
+// requiredUrl              : path before the urlArgument, can be 'undefined'
+//                            if isset to '/home/' domain.com/contact will redirect to 'error404', because domain.com/home/contact is needed
+// insertIntoParentTemplate : defines if a template is inserted into a parent one or is a mastertemplates, default is false
+// hasTemplate              : defines if this argument has its own template or if it uses the parent one (eg for article IDs), default is true
+
+// modifyCallback           : a callback function, which is called after the loading of the template is finished, can be 'undefined'
 ```
 
 ### init
@@ -36,8 +40,8 @@ simpleCMS.init({homedir});
 
 ```javascript
 window.onload = function() {
-    simpleCMS.registerTemplate('home', 0, undefined, '/src/templates/home.html', 'content');
-    simpleCMS.registerTemplate('contact', 1, '/home/', '/src/templates/contact.html', 'content');
+    simpleCMS.registerTemplate('home', '/src/templates/home.html', 'content');
+    simpleCMS.registerTemplate('contact', '/src/templates/contact.html', 'subcontent', {requiredUrl: '/home/', insertIntoParentTemplate: true});
     simpleCMS.init({homedir: 'home'});
 };
 ```
@@ -45,16 +49,29 @@ window.onload = function() {
 ### Beispiel mit Callback
 Es ist außerdem möglich eine Callbackfunktion zu registrieren, die **nach** dem Erfolgreichen Laden und Einbinden des Templates ausgeführt wird. Dies ist gedacht für Code, der nach dem Laden einmalig ausgeführt werden soll.
 
+#### Der data-Parameter
+Die Callbackfunktion bekommt beim Ausführen stets Daten mitgegeben:
+```
+data = {
+    lastUrlParameter //the last parameter of the url as string
+    urlParameter //all parameters as string array
+    lastPage : {
+        urlParameter //the last parameter of the previous visited page as string
+        lastUrlParameter //all of the last parameters of the previous visited page as string arra
+    }
+}
+```
+
 ```javascript
 // ...
-simpleCMS.registerTemplate('webmail', 2, '/home/contact/', '/src/templates/webmail.html', 'content', function() {
-    //do something
+simpleCMS.registerTemplate('webmail', '/src/templates/webmail.html', 'subcontent', {requiredUrl: '/home/contact/', insertIntoParentTemplate: true}, function(data) {
+    console.log(data);
 });
 // ...
 ```
 
 ## Navigation
-Klassiche Links mittels `<a href="/home/contact">Contact</a>` sind weiterhin möglich und werden abgefangen ohne die Seite neu zu laden. Außerdem kann die Seite geändert werden mittels Javascript. Dazu ist der Befehl `simpleCMS.setPage(url)` von nöten.
+Klassische Links mittels `<a href="/home/contact">Contact</a>` sind weiterhin möglich und werden abgefangen ohne die Seite neu zu laden. Außerdem kann die Seite geändert werden mittels Javascript. Dazu ist der Befehl `simpleCMS.setPage(url)` von nöten.
 
 ## WebsiteContent
 Per Standard müssen sich alle Dateien im `/src/`-Ordner auf dem Webserver befinden, damit der Apache-Server die URL nicht umschreibt (URL-Rewriting ist hier nötig um Pfade wie `domain.com/home/contact` ohne `?` zu nutzen und ohne dass die Pfade tatsächlich existieren müssen).

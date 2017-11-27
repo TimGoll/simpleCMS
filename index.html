@@ -12,8 +12,10 @@
 
     <script>
         window.onload = function() {
-            simpleCMS.registerTemplate('home', 0, undefined, '/src/templates/home.html', 'content');
-            simpleCMS.registerTemplate('wishes', 1, '/home/', '/src/templates/wishes.html', 'content');
+            simpleCMS.registerTemplate('home', '/src/templates/home.html', 'content');
+            simpleCMS.registerTemplate('wishes', '/src/templates/wishes.html', 'subcontent', {requiredUrl: '/home/', insertIntoParentTemplate: true}, function(data) {
+                console.log(data);
+            });
             simpleCMS.init({homedir: 'home'});
         };
     </script>
