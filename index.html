@@ -13,7 +13,7 @@
     <script>
         window.onload = function() {
             simpleCMS.registerTemplate('home', '/src/templates/home.html', 'content');
-            simpleCMS.registerTemplate('wishes', '/src/templates/wishes.html', 'subcontent', {requiredUrl: '/home/', insertIntoParentTemplate: true}, function(data) {
+            simpleCMS.registerTemplate('wishes', '/src/templates/wishes.html', 'subcontent', {requiredUrl: '/home/', insertIntoParentTemplate: true, hasChild: true}, function(data) {
                 console.log(data);
             });
             simpleCMS.init({homedir: 'home'});

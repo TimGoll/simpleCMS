@@ -1,14 +1,12 @@
 var simpleCMS = (function() {
     window.onclick = function(event) {
-
         for (var i = 0; i < event.path.length -4; i++) { //-4: Window, Document, HTML and Body are ignored
             if (event.path[i].href != undefined) {
                 simpleCMS.setPage(event.path[i].href, true);
+                event.preventDefault();
                 break;
             }
         }
-
-        event.preventDefault();
     };
 
     //catch history change events
@@ -29,12 +27,10 @@ var simpleCMS = (function() {
 
             console.log("Setting up CMS ...");
 
-            this.registerTemplate('error404', 0, undefined, '/src/templates/error404.html', 'content');
+            this.registerTemplate('error404', '/src/templates/error404.html', 'content');
             this.setPage(window.location.href, true);
         },
         setPage : function(url, newState) {
-            var oldPath = window.location.href.substr( url.indexOf(window.location.hostname) + window.location.hostname.length + 1 );
-
             //getting relative url: bla.com/abc/def --> abc/def
             var rel_url = url.substr( url.indexOf(window.location.hostname) + window.location.hostname.length + 1 );
 
@@ -48,23 +44,33 @@ var simpleCMS = (function() {
             }
 
             var urlData = _getUrlData(rel_url);
+            var urlDataForCallback = _getUrlData(rel_url);
+
+            var this_template = {};
 
             //check if last value is in templates
             if (!(urlData[urlData.length -1] in _templates)) {
-                url = '/error404';
-                rel_url = 'error404';
-                urlData.push(rel_url);
+                //check if parent path hasChild
+                if (urlData[urlData.length -2] in _templates && _templates[urlData[urlData.length -2]].hasChild) {
+                    urlData.pop();
+                    this_template = _templates[ urlData[urlData.length -1] ];
+                } else {
+                    url = '/error404';
+                    rel_url = 'error404';
+                    urlData = [rel_url];
+                    this_template = _templates[rel_url];
+                }
+            } else {
+                this_template = _templates[ urlData[urlData.length -1] ];
             }
-
-            var this_template = _templates[ urlData[urlData.length -1] ];
 
             //check if requiredUrl is fitting
             var required_rel_url = '/' + rel_url.substr(0, rel_url.indexOf( urlData[urlData.length -1] ));
             if (this_template.requiredUrl != undefined && this_template.requiredUrl != required_rel_url) {
                 url = '/error404';
                 rel_url = 'error404';
-                _urlData.push(rel_url);
-                this_template = _templates[ urlData[urlData.length -1] ];
+                urlData = [rel_url];
+                this_template = _templates[rel_url];
             }
 
             if (newState == true) //should add entry to browser history
@@ -82,18 +88,19 @@ var simpleCMS = (function() {
             }
 
             var data = { //values for callback
-                lastUrlParameter : urlData[urlData.length -1],
-                urlParameter     : urlData,
+                lastUrlParameter : urlDataForCallback[urlDataForCallback.length -1],
+                urlParameter     : urlDataForCallback,
                 lastPage         : {
-                    urlParameter : _getUrlData(oldPath),
-                    lastUrlParameter : _getUrlData(oldPath)[_getUrlData(oldPath).length -1]
+                    urlParameter : _lastPage,
+                    lastUrlParameter : _lastPage[_lastPage.length -1]
                 }
             }
 
             _loadCascadingTemplate(templateListTmp, nextTemplateTmp, data);
 
+            _lastPage = urlData;
         },
-        registerTemplate : function(urlArgument, templateUrl, insertionElementId, {requiredUrl, insertIntoParentTemplate, hasTemplate} = {}, modifyCallback) {
+        registerTemplate : function(urlArgument, templateUrl, insertionElementId, {requiredUrl, insertIntoParentTemplate, hasTemplate, hasChild} = {}, modifyCallback) {
             _templates[urlArgument] = {
                 templateUrl              : templateUrl,
                 insertionElementId       : insertionElementId,
@@ -102,6 +109,7 @@ var simpleCMS = (function() {
                 requiredUrl              : requiredUrl,
                 insertIntoParentTemplate : insertIntoParentTemplate || false,
                 hasTemplate              : hasTemplate || true,
+                hasChild                 : hasChild || false,
 
                 modifyCallback           : modifyCallback
             };
@@ -115,6 +123,7 @@ var simpleCMS = (function() {
 
     var _homedir = '';
     var _templates = {};
+    var _lastPage = [];
 
     var _getUrlData = function(url) {
         return url.split('/');

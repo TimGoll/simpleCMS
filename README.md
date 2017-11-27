@@ -17,7 +17,7 @@ Beim initialen Seitenladen muss einiges eingerichtet werden. Zuerst müssen die 
 
 ### registerTemplate
 ```javascript
-simpleCMS.registerTemplate : function(urlArgument, templateUrl, insertionElementId, {requiredUrl, insertIntoParentTemplate, hasTemplate}, modifyCallback);
+simpleCMS.registerTemplate : function(urlArgument, templateUrl, insertionElementId, {requiredUrl, insertIntoParentTemplate, hasTemplate, hasChild}, modifyCallback);
 // urlArgument              : String after the last '/' which is linked to this template
 // templateUrl              : path to the template
 // insertionElementId       : html element ID to insert the template into
@@ -25,7 +25,8 @@ simpleCMS.registerTemplate : function(urlArgument, templateUrl, insertionElement
 // requiredUrl              : path before the urlArgument, can be 'undefined'
 //                            if isset to '/home/' domain.com/contact will redirect to 'error404', because domain.com/home/contact is needed
 // insertIntoParentTemplate : defines if a template is inserted into a parent one or is a mastertemplates, default is false
-// hasTemplate              : defines if this argument has its own template or if it uses the parent one (eg for article IDs), default is true
+// hasTemplate              : defines if this argument has its own template or if it uses the parent one, default is true
+// hasChild                 : defines if this template is used with different data inside (like articles loaded by IDs), default is false
 
 // modifyCallback           : a callback function, which is called after the loading of the template is finished, can be 'undefined'
 ```
@@ -69,6 +70,23 @@ simpleCMS.registerTemplate('webmail', '/src/templates/webmail.html', 'subcontent
 });
 // ...
 ```
+
+### Beispiel mit hasChild
+HasChild wird auf `true` gesetzt, wenn man möchte, dass das folgende URL-Argument eine Variable ist, die beispielsweise den Inhalt der Seite definiert, ohne jedoch ein weiteres Template zu laden. `domain.com/home/article/9` würde zum Beispiel das articles template in das home template einbinden und anschließend Artikel Nummer 9 aus einer Datenbank auslesen. Für letzteres eignet sich der `modifyCallback`.
+
+```javascript
+// ...
+simpleCMS.registerTemplate('article', '/src/templates/article.html', 'subcontent', {requiredUrl: '/home/', insertIntoParentTemplate: true, hasChild: true}, function(data) {
+    //eg: request article from server
+    var formData = new FormData();
+    formData.append('article', data.lastUrlParameter);
+    simpleAJAX.request(formData, '/src/php/requestArticle.php', function(data) {
+        //process article
+    });
+});
+// ...
+```
+Nach dem Laden und Einbinden aller Templates wird die Callback-Funktion ausgeführt. Um eine Anfrage an den Server zu stellen, erzeugen wir ein neues `FormData` Objekt und übergeben diese die ID. Die ID ist das letzte Element in der URL und ist daher mit `data.lastUrlParameter` abfragbar. Die Anfrage wird an ein PHP Skript auf unserem Server geschickt, welcher als Antwort den Artikel sendet. Dieser wird nun einfach per Javascript eingebunden.
 
 ## Navigation
 Klassische Links mittels `<a href="/home/contact">Contact</a>` sind weiterhin möglich und werden abgefangen ohne die Seite neu zu laden. Außerdem kann die Seite geändert werden mittels Javascript. Dazu ist der Befehl `simpleCMS.setPage(url)` von nöten.
