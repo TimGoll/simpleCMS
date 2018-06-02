@@ -1,10 +1,28 @@
 var simpleCMS = (function() {
     window.onclick = function(event) {
         for (var i = 0; i < event.path.length -4; i++) { //-4: Window, Document, HTML and Body are ignored
-            if (event.path[i].href != undefined) {
-                simpleCMS.setPage(event.path[i].href, true);
-                event.preventDefault();
+            //check for link
+            if (event.path[i].href == undefined)
                 break;
+
+            //check for target
+            var target = event.path[i].target == '' ? '_self' : event.path[i].target;
+
+            //check for external links
+            var http_link  = event.path[i].href.indexOf('http://') == 0;
+            var https_link = event.path[i].href.indexOf('https://') == 0;
+            var external = http_link || https_link;
+
+            if (external) {
+                window.open(event.path[i].href, target);
+            } else {
+                if (target == '_self') {
+                    simpleCMS.setPage(event.path[i].href, true);
+                    event.preventDefault();
+                    break;
+                } else {
+                    window.open(event.path[i].href, target);
+                }
             }
         }
     };
@@ -22,12 +40,12 @@ var simpleCMS = (function() {
     ////////////////////////////////////////////////////////////////////////////
 
     var simpleCMS = {
-        init : function({homedir} = {}) {
+        init : function({homedir, errorPath} = {}) {
             _homedir = homedir || 'home';
 
             console.log("Setting up CMS ...");
 
-            this.registerTemplate('error404', '/src/templates/error404.html', 'content');
+            this.registerTemplate('error404', errorPath, 'content');
             this.setPage(window.location.href, true);
         },
         setPage : function(url, newState) {
@@ -38,7 +56,7 @@ var simpleCMS = (function() {
             if (rel_url.charAt(rel_url.length -1) == '/')
                 rel_url = rel_url.substr(0, rel_url.length -1);
 
-            if (rel_url.length <= 0) { //navigate to default location if no location is set
+            if (rel_url.length <= 0 || rel_url == 'index.html' || rel_url == 'index.php') { //navigate to default location if no location is set
                 url += _homedir;
                 rel_url = url.substr( url.indexOf(window.location.hostname) + window.location.hostname.length + 1 );
             }

@@ -33,8 +33,9 @@ simpleCMS.registerTemplate : function(urlArgument, templateUrl, insertionElement
 
 ### init
 ```javascript
-simpleCMS.init({homedir});
-// homedir : path to redirect to if just domain.com is entered (domain.com --> domain.com/home)
+simpleCMS.init({homedir, errorPath});
+// homedir   : path to redirect to if just domain.com is entered (domain.com --> domain.com/home)
+// errorPath : path to the error404.html template
 ```
 
 ### Beispiel
@@ -43,7 +44,7 @@ simpleCMS.init({homedir});
 window.onload = function() {
     simpleCMS.registerTemplate('home', '/src/templates/home.html', 'content');
     simpleCMS.registerTemplate('contact', '/src/templates/contact.html', 'subcontent', {requiredUrl: '/home/', insertIntoParentTemplate: true});
-    simpleCMS.init({homedir: 'home'});
+    simpleCMS.init({homedir: 'home', errorPath: '/src/templates/error404.html'});
 };
 ```
 

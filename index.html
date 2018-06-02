@@ -16,7 +16,7 @@
             simpleCMS.registerTemplate('wishes', '/src/templates/wishes.html', 'subcontent', {requiredUrl: '/home/', insertIntoParentTemplate: true, hasChild: true}, function(data) {
                 console.log(data);
             });
-            simpleCMS.init({homedir: 'home'});
+            simpleCMS.init({homedir: 'home', errorPath: '/src/templates/error404.html'});
         };
     </script>
 
