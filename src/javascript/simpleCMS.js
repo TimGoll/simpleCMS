@@ -68,17 +68,23 @@ var simpleCMS = (function() {
 
             //check if last value is in templates
             if (!(urlData[urlData.length -1] in _templates)) {
-                //check if parent path hasChild
-                if (urlData[urlData.length -2] in _templates && _templates[urlData[urlData.length -2]].hasChild) {
-                    urlData.pop();
-                    this_template = _templates[ urlData[urlData.length -1] ];
-                } else {
-                    url = '/error404';
-                    rel_url = 'error404';
-                    urlData = [rel_url];
-                    this_template = _templates[rel_url];
+                for (var offset = 0; offset < urlData.length; offset++) {
+                    //iterate backwarts through the url arguments
+                    if ((urlData[urlData.length - offset -1] in _templates)) { //valid template found
+                        if (offset <= _templates[urlData[urlData.length - offset -1]].hasChild) {
+                            for (var i = 0; i < offset; i++) {
+                                urlData.pop();
+                            }
+                            this_template = _templates[ urlData[urlData.length -1] ];
+                        } else { //template child are not valid
+                            url = '/error404';
+                            rel_url = 'error404';
+                            urlData = [rel_url];
+                            this_template = _templates[rel_url];
+                        }
+                    }
                 }
-            } else {
+            } else { //default case
                 this_template = _templates[ urlData[urlData.length -1] ];
             }
 
@@ -127,7 +133,7 @@ var simpleCMS = (function() {
                 requiredUrl              : requiredUrl,
                 insertIntoParentTemplate : insertIntoParentTemplate || false,
                 hasTemplate              : hasTemplate || true,
-                hasChild                 : hasChild || false,
+                hasChild                 : hasChild || 0,
 
                 modifyCallback           : modifyCallback
             };

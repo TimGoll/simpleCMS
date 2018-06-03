@@ -26,7 +26,7 @@ simpleCMS.registerTemplate : function(urlArgument, templateUrl, insertionElement
 //                            if isset to '/home/' domain.com/contact will redirect to 'error404', because domain.com/home/contact is needed
 // insertIntoParentTemplate : defines if a template is inserted into a parent one or is a mastertemplates, default is false
 // hasTemplate              : defines if this argument has its own template or if it uses the parent one, default is true
-// hasChild                 : defines if this template is used with different data inside (like articles loaded by IDs), default is false
+// hasChild                 : defines if this template is used with different data inside (like articles loaded by IDs), default is 0
 
 // modifyCallback           : a callback function, which is called after the loading of the template is finished, can be 'undefined'
 ```
@@ -73,11 +73,11 @@ simpleCMS.registerTemplate('webmail', '/src/templates/webmail.html', 'subcontent
 ```
 
 ### Beispiel mit hasChild
-HasChild wird auf `true` gesetzt, wenn man möchte, dass das folgende URL-Argument eine Variable ist, die beispielsweise den Inhalt der Seite definiert, ohne jedoch ein weiteres Template zu laden. `domain.com/home/article/9` würde zum Beispiel das articles template in das home template einbinden und anschließend Artikel Nummer 9 aus einer Datenbank auslesen. Für letzteres eignet sich der `modifyCallback`.
+HasChild wird auf einen Wert größer als 0 gesetzt, wenn man möchte, dass die folgenden URL-Argumente Variable sind, die beispielsweise den Inhalt der Seite definieren, ohne jedoch ein weiteres Template zu laden. Bei `hasChild: 1` und `domain.com/home/article/9` würde zum Beispiel das `article`-Template in das `home`-Template einbinden und anschließend Artikel Nummer 9 aus einer Datenbank auslesen. Für letzteres eignet sich der `modifyCallback`.
 
 ```javascript
 // ...
-simpleCMS.registerTemplate('article', '/src/templates/article.html', 'subcontent', {requiredUrl: '/home/', insertIntoParentTemplate: true, hasChild: true}, function(data) {
+simpleCMS.registerTemplate('article', '/src/templates/article.html', 'subcontent', {requiredUrl: '/home/', insertIntoParentTemplate: true, hasChild: 1}, function(data) {
     //eg: request article from server
     var formData = new FormData();
     formData.append('article', data.lastUrlParameter);
